@@ -1,0 +1,105 @@
+@use '@/styles/variables.scss' as *;
+
+.healthRecordItem {
+  @include big-card;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  @include click-feedback;
+}
+
+.recordInfo {
+  flex: 1;
+}
+
+.recordType {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.recordDateTime {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.recordNote {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.recordValue {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-xs;
+}
+
+.valueMain {
+  font-size: $font-size-giant;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.valueUnit {
+  font-size: $font-size-lg;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.valueSecond {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.valueSecondRow {
+  font-size: $font-size-lg;
+  color: $color-text-secondary;
+  font-weight: $font-weight-semibold;
+}
+
+.valueLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.typeIcon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  background: rgba(255, 122, 69, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xxl;
+  margin-right: $spacing-lg;
+  flex-shrink: 0;
+}
+
+.recordLeft {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.abnormal {
+  .valueMain {
+    color: $color-error;
+  }
+  
+  .typeIcon {
+    background: rgba(245, 63, 63, 0.1);
+  }
+}
+
+.normal {
+  .valueMain {
+    color: $color-success;
+  }
+  
+  .typeIcon {
+    background: rgba(0, 180, 42, 0.1);
+  }
+}

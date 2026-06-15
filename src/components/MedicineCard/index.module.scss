@@ -1,0 +1,120 @@
+@use '@/styles/variables.scss' as *;
+
+.medicineCard {
+  @include big-card;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  @include click-feedback;
+}
+
+.colorIndicator {
+  width: 16rpx;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: $radius-lg 0 0 $radius-lg;
+}
+
+.medicineImage {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-md;
+  margin-left: $spacing-md;
+  margin-right: $spacing-lg;
+  flex-shrink: 0;
+  background: $color-bg-hover;
+}
+
+.medicineInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.medicineName {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  @include text-ellipsis;
+}
+
+.medicineDosage {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.medicineTime {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.timeSlotTag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.chevron {
+  font-size: $font-size-xl;
+  color: $color-text-tertiary;
+  margin-left: $spacing-md;
+  flex-shrink: 0;
+}
+
+.inactive {
+  opacity: 0.5;
+}
+
+.statusBadge {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-lg;
+  padding: 8rpx 20rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}
+
+.statusTaken {
+  background: $color-success;
+}
+
+.statusPending {
+  background: $color-warning;
+}
+
+.statusMissed {
+  background: $color-error;
+}
+
+.statusSkipped {
+  background: $color-text-tertiary;
+}
+
+.large {
+  padding: $spacing-xl;
+  
+  .medicineImage {
+    width: 160rpx;
+    height: 160rpx;
+  }
+  
+  .medicineName {
+    font-size: $font-size-xxl;
+  }
+  
+  .medicineDosage {
+    font-size: $font-size-lg;
+  }
+}

@@ -1,0 +1,105 @@
+@use '@/styles/compat.scss';
+@use '@/styles/variables.scss' as *;
+
+// 全局样式
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB',
+    sans-serif;
+  font-size: $font-size-md;
+  line-height: $line-height-loose;
+  color: $color-text-primary;
+  background-color: $color-bg-page;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// 基础容器样式
+.page-container {
+  padding: 0 $page-padding;
+  padding-bottom: $spacing-xl;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+// 页面标题
+.page-title {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+  padding-top: $spacing-lg;
+}
+
+// 页面副标题
+.page-subtitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+// 高对比模式
+.high-contrast {
+  page {
+    background-color: $color-hc-bg !important;
+    color: $color-hc-text !important;
+  }
+  
+  .page-title,
+  .page-subtitle {
+    color: $color-hc-text !important;
+  }
+}
+
+// 简洁模式
+.simple-mode {
+  .card-decoration {
+    display: none !important;
+  }
+  
+  .extra-info {
+    display: none !important;
+  }
+}
+
+// 通用隐藏类
+.hidden {
+  display: none !important;
+}
+
+// 大号文字类
+.text-large {
+  font-size: $font-size-xl !important;
+}
+
+.text-huge {
+  font-size: $font-size-huge !important;
+}
+
+// 居中类
+.center {
+  text-align: center;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 颜色文字
+.text-primary {
+  color: $color-primary;
+}
+
+.text-success {
+  color: $color-success;
+}
+
+.text-warning {
+  color: $color-warning;
+}
+
+.text-error {
+  color: $color-error;
+}

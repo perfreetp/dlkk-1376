@@ -1,0 +1,104 @@
+@use '@/styles/variables.scss' as *;
+
+.familyMemberCard {
+  @include big-card;
+  display: flex;
+  align-items: center;
+  @include click-feedback;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-round;
+  background: $color-bg-hover;
+  margin-right: $spacing-lg;
+  flex-shrink: 0;
+}
+
+.memberInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.memberName {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.memberRelation {
+  font-size: $font-size-md;
+  color: $color-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.memberPhone {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.permissionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.permissionTag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  background: rgba(255, 122, 69, 0.1);
+  color: $color-primary;
+}
+
+.permissionTag.disabled {
+  background: $color-bg-hover;
+  color: $color-text-tertiary;
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  margin-left: $spacing-md;
+}
+
+.actionBtn {
+  @include button-reset;
+  height: 64rpx;
+  min-width: 120rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  @include click-feedback;
+}
+
+.callBtn {
+  background: $color-primary;
+  color: $color-text-white;
+}
+
+.editBtn {
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.boundBadge {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-lg;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  background: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+}
+
+.unbound {
+  opacity: 0.6;
+}

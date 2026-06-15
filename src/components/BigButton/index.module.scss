@@ -1,0 +1,75 @@
+@use '@/styles/variables.scss' as *;
+
+.bigButton {
+  @include big-button($color-primary, $color-text-white);
+  width: 100%;
+  margin-bottom: $spacing-md;
+  font-weight: $font-weight-bold;
+  letter-spacing: 2rpx;
+}
+
+.success {
+  background: $color-success;
+}
+
+.warning {
+  background: $color-warning;
+}
+
+.error {
+  background: $color-error;
+}
+
+.info {
+  background: $color-info;
+}
+
+.secondary {
+  background: $color-text-secondary;
+}
+
+.outline {
+  background: transparent;
+  border: 4rpx solid $color-primary;
+  color: $color-primary;
+
+  &.success {
+    border-color: $color-success;
+    color: $color-success;
+  }
+
+  &.warning {
+    border-color: $color-warning;
+    color: $color-warning;
+  }
+
+  &.error {
+    border-color: $color-error;
+    color: $color-error;
+  }
+
+  &.info {
+    border-color: $color-info;
+    color: $color-info;
+  }
+}
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.small {
+  height: 80rpx;
+  font-size: $font-size-lg;
+  min-width: 160rpx;
+}
+
+.large {
+  height: 140rpx;
+  font-size: $font-size-xxl;
+}
+
+.block {
+  width: 100%;
+}

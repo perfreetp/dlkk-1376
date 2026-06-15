@@ -1,0 +1,311 @@
+@use '@/styles/variables.scss' as *;
+
+.reminderPage {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $spacing-lg $page-padding $spacing-xxl;
+}
+
+.settingCard {
+  @include big-card;
+}
+
+.settingHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.settingTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.settingDesc {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.settingItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg 0;
+  border-bottom: 2rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.itemLabel {
+  flex: 1;
+}
+
+.itemTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-xs;
+}
+
+.itemSubtitle {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.switchWrapper {
+  flex-shrink: 0;
+}
+
+.switch {
+  width: 100rpx;
+  height: 60rpx;
+  border-radius: $radius-round;
+  background: $color-text-disabled;
+  position: relative;
+  transition: all $transition-base;
+  @include click-feedback;
+}
+
+.switch.active {
+  background: $color-primary;
+}
+
+.switchKnob {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: $radius-round;
+  background: $color-text-white;
+  position: absolute;
+  top: 4rpx;
+  left: 4rpx;
+  transition: all $transition-base;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+.switch.active .switchKnob {
+  left: 44rpx;
+}
+
+.volumeControl {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+.volumeValue {
+  font-size: $font-size-huge;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  text-align: center;
+  margin-bottom: $spacing-md;
+}
+
+.volumeUnit {
+  font-size: $font-size-lg;
+  color: $color-text-secondary;
+  font-weight: normal;
+}
+
+.volumeButtons {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.volumeBtn {
+  flex: 1;
+  @include button-reset;
+  height: 100rpx;
+  border-radius: $radius-lg;
+  background: $color-bg-page;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  @include click-feedback;
+}
+
+.volumeBtn:active {
+  background: $color-bg-hover;
+}
+
+.speedControl {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.speedBtn {
+  flex: 1;
+  @include button-reset;
+  height: 80rpx;
+  border-radius: $radius-md;
+  background: $color-bg-page;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  @include click-feedback;
+}
+
+.speedBtn.active {
+  background: $color-primary;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.modeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.modeOption {
+  @include big-card;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg;
+  @include click-feedback;
+}
+
+.modeOption.active {
+  border: 4rpx solid $color-primary;
+  background: rgba(255, 122, 69, 0.05);
+}
+
+.modeIcon {
+  font-size: $font-size-giant;
+  margin-right: $spacing-lg;
+  width: 100rpx;
+  text-align: center;
+}
+
+.modeInfo {
+  flex: 1;
+}
+
+.modeName {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.modeDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.modeCheck {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: $radius-round;
+  border: 4rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-lg;
+  color: transparent;
+  flex-shrink: 0;
+}
+
+.modeOption.active .modeCheck {
+  background: $color-primary;
+  border-color: $color-primary;
+  color: $color-text-white;
+}
+
+.timeSettings {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.timeSlotSetting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.timeSlotIcon {
+  font-size: $font-size-xxl;
+  margin-right: $spacing-md;
+}
+
+.timeSlotName {
+  flex: 1;
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.timePicker {
+  @include button-reset;
+  height: 72rpx;
+  padding: 0 $spacing-lg;
+  border-radius: $radius-button;
+  background: $color-primary;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  @include click-feedback;
+}
+
+.testButton {
+  margin-top: $spacing-xl;
+}
+
+.sectionDivider {
+  height: $spacing-lg;
+}
+
+.fontSizeSelector {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.fontSizeBtn {
+  flex: 1;
+  @include button-reset;
+  height: 100rpx;
+  border-radius: $radius-md;
+  background: $color-bg-page;
+  @include click-feedback;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+}
+
+.fontSizeBtn.active {
+  background: $color-primary;
+  color: $color-text-white;
+}
+
+.fontSizeText {
+  font-weight: $font-weight-semibold;
+}
+
+.fontSizeText.small {
+  font-size: $font-size-md;
+}
+
+.fontSizeText.normal {
+  font-size: $font-size-lg;
+}
+
+.fontSizeText.large {
+  font-size: $font-size-xl;
+}
+
+.fontSizeLabel {
+  font-size: $font-size-xs;
+  opacity: 0.8;
+}

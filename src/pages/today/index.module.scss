@@ -1,0 +1,228 @@
+@use '@/styles/variables.scss' as *;
+
+.todayPage {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl $page-padding $spacing-xxl;
+  color: $color-text-white;
+  border-radius: 0 0 $radius-xl $radius-xl;
+  margin-bottom: -$spacing-xl;
+  position: relative;
+  overflow: hidden;
+}
+
+.greeting {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-sm;
+}
+
+.dateInfo {
+  font-size: $font-size-lg;
+  opacity: 0.9;
+  margin-bottom: $spacing-lg;
+}
+
+.progressCard {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10rpx);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progressInfo {
+  flex: 1;
+}
+
+.progressLabel {
+  font-size: $font-size-lg;
+  margin-bottom: $spacing-sm;
+  opacity: 0.9;
+}
+
+.progressNumbers {
+  font-size: $font-size-huge;
+  font-weight: $font-weight-bold;
+}
+
+.progressCircle {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: $radius-round;
+  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.progressValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+}
+
+.content {
+  padding: $spacing-xl $page-padding;
+  padding-top: $spacing-xxl;
+}
+
+.alertBanner {
+  @include big-card;
+  background: linear-gradient(135deg, $color-error 0%, lighten($color-error, 10%) 100%);
+  color: $color-text-white;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+}
+
+.alertIcon {
+  font-size: $font-size-xxl;
+}
+
+.alertContent {
+  flex: 1;
+}
+
+.alertTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
+}
+
+.alertDesc {
+  font-size: $font-size-md;
+  opacity: 0.9;
+}
+
+.sectionTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  padding-left: $spacing-sm;
+  border-left: 8rpx solid $color-primary;
+}
+
+.weeklyStats {
+  @include big-card;
+  padding: $spacing-lg;
+}
+
+.weeklyTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.weeklyChart {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 200rpx;
+  padding: 0 $spacing-sm;
+}
+
+.weeklyBar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.barWrapper {
+  width: 40rpx;
+  height: 140rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: $spacing-sm;
+}
+
+.barFill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-sm;
+  transition: height 0.5s ease;
+}
+
+.barFill.low {
+  background: linear-gradient(180deg, $color-error 0%, lighten($color-error, 10%) 100%);
+}
+
+.barFill.medium {
+  background: linear-gradient(180deg, $color-warning 0%, lighten($color-warning, 10%) 100%);
+}
+
+.barFill.high {
+  background: linear-gradient(180deg, $color-success 0%, lighten($color-success, 10%) 100%);
+}
+
+.barPercent {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.barDay {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xxl $spacing-xl;
+  color: $color-text-tertiary;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-md;
+}
+
+.emptyText {
+  font-size: $font-size-lg;
+}
+
+.quickActions {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+}
+
+.quickAction {
+  flex: 1;
+  @include button-reset;
+  height: 100rpx;
+  border-radius: $radius-lg;
+  background: $color-bg-card;
+  box-shadow: $shadow-card;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include click-feedback;
+}
+
+.quickAction.primary {
+  background: $color-primary;
+  color: $color-text-white;
+}
+
+.quickAction.success {
+  background: $color-success;
+  color: $color-text-white;
+}
