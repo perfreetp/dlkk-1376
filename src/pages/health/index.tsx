@@ -10,7 +10,13 @@ import BigButton from '@/components/BigButton';
 import styles from './index.module.scss';
 
 const HealthPage: React.FC = () => {
-  const { healthRecords, addHealthRecord, getHealthRecordsByType, settings } = useAppStore();
+  const {
+    healthRecords,
+    addHealthRecord,
+    deleteHealthRecord,
+    getHealthRecordsByType,
+    settings
+  } = useAppStore();
   const [selectedType, setSelectedType] = useState<HealthRecordType>('bloodPressure');
   const [filterType, setFilterType] = useState<HealthRecordType | 'all'>('all');
   const [value1, setValue1] = useState('');
@@ -102,6 +108,24 @@ const HealthPage: React.FC = () => {
       return;
     }
 
+    if (checkAbnormal(selectedType, num1, num2)) {
+      Taro.showModal({
+        title: '数值异常提醒',
+        content: `您记录的${HEALTH_TYPE_LABELS[selectedType]}数值可能不在正常范围内，是否确认保存？`,
+        confirmText: '确认保存',
+        cancelText: '重新输入',
+        success: (res) => {
+          if (res.confirm) {
+            doSaveRecord(num1, num2);
+          }
+        }
+      });
+    } else {
+      doSaveRecord(num1, num2);
+    }
+  };
+
+  const doSaveRecord = (num1: number, num2?: number) => {
     addHealthRecord({
       type: selectedType,
       value: num1,
@@ -120,6 +144,40 @@ const HealthPage: React.FC = () => {
       title: '记录已保存',
       icon: 'success'
     });
+  };
+
+  const handleDeleteRecord = (id: string) => {
+    Taro.showModal({
+      title: '确认删除',
+      content: '确定要删除这条记录吗？',
+      confirmText: '删除',
+      cancelText: '取消',
+      confirmColor: '#f53f3f',
+      success: (res) => {
+        if (res.confirm) {
+          deleteHealthRecord(id);
+          Taro.showToast({
+            title: '已删除',
+            icon: 'success'
+          });
+        }
+      }
+    });
+  };
+
+  const getStatsText = (type: HealthRecordType): string => {
+    const records = getHealthRecordsByType(type).slice(0, 7);
+    if (records.length === 0) return '暂无数据';
+    
+    const values = records.map(r => r.value);
+    const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length * 10) / 10;
+    
+    if (type === 'bloodPressure') {
+      const values2 = records.map(r => r.value2 || 0);
+      const avg2 = Math.round(values2.reduce((a, b) => a + b, 0) / values2.length * 10) / 10;
+      return `7天平均：${avg}/${avg2} ${HEALTH_TYPE_UNITS[type]}`;
+    }
+    return `7天平均：${avg} ${HEALTH_TYPE_UNITS[type]}`;
   };
 
   const getValueDisplay = (type: HealthRecordType) => {
@@ -238,27 +296,52 @@ const HealthPage: React.FC = () => {
       </View>
 
       <View className={styles.trendChart}>
-        <Text className={styles.trendTitle}>
-          {HEALTH_TYPE_LABELS[selectedType]}趋势（近7天）
-        </Text>
+        <View style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '24rpx'
+        }}>
+          <Text className={styles.trendTitle}>
+            {HEALTH_TYPE_LABELS[selectedType]}趋势（近7天）
+          </Text>
+          <Text style={{ fontSize: '24rpx', color: '#86909c' }}>
+            {getStatsText(selectedType)}
+          </Text>
+        </View>
         {trendData.length > 0 ? (
-          <View className={styles.chartContainer}>
-            {trendData.map((item, index) => (
-              <View key={index} className={styles.chartBar}>
-                <Text className={styles.barValue}>{item.value}</Text>
-                <View className={styles.barWrapper}>
-                  <View
-                    className={classNames(
-                      styles.barFill,
-                      item.isAbnormal ? styles.high : styles.normal
-                    )}
-                    style={{ height: `${item.percentage}%` }}
-                  />
+          <>
+            <View className={styles.chartContainer}>
+              {trendData.map((item, index) => (
+                <View key={index} className={styles.chartBar}>
+                  <Text className={styles.barValue}>{item.value}</Text>
+                  <View className={styles.barWrapper}>
+                    <View
+                      className={classNames(
+                        styles.barFill,
+                        item.isAbnormal ? styles.high : styles.normal
+                      )}
+                      style={{ height: `${item.percentage}%` }}
+                    />
+                  </View>
+                  <Text className={styles.barDay}>{item.day}</Text>
                 </View>
-                <Text className={styles.barDay}>{item.day}</Text>
+              ))}
+            </View>
+            {getHealthRecordsByType(selectedType).length > 0 && (
+              <View style={{
+                marginTop: '24rpx',
+                padding: '24rpx',
+                background: '#f7f8fa',
+                borderRadius: '16rpx'
+              }}>
+                <Text style={{ fontSize: '26rpx', color: '#86909c' }}>
+                  💡 共记录 {getHealthRecordsByType(selectedType).length} 条
+                  {HEALTH_TYPE_LABELS[selectedType]}数据
+                </Text>
               </View>
-            ))}
-          </View>
+            )}
+          </>
         ) : (
           <View className={styles.emptyState} style={{ background: 'transparent', boxShadow: 'none' }}>
             <Text className={styles.emptyIcon}>📊</Text>
@@ -290,11 +373,34 @@ const HealthPage: React.FC = () => {
 
         {filteredRecords.length > 0 ? (
           filteredRecords.map(record => (
-            <HealthRecordItem
+            <View
               key={record.id}
-              record={record}
-              isAbnormal={checkAbnormal(record.type, record.value, record.value2)}
-            />
+              style={{ position: 'relative' }}
+              onLongPress={() => handleDeleteRecord(record.id)}
+            >
+              <HealthRecordItem
+                record={record}
+                isAbnormal={checkAbnormal(record.type, record.value, record.value2)}
+              />
+              <Button
+                style={{
+                  position: 'absolute',
+                  right: '16rpx',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: 'auto',
+                  height: '48rpx',
+                  lineHeight: '48rpx',
+                  fontSize: '22rpx',
+                  padding: '0 16rpx',
+                  color: '#86909c',
+                  background: 'transparent'
+                }}
+                onClick={() => handleDeleteRecord(record.id)}
+              >
+                删除
+              </Button>
+            </View>
           ))
         ) : (
           <View className={styles.emptyState}>

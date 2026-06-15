@@ -3,7 +3,8 @@ import { View, Text, Button, ScrollView } from '@tarojs/components';
 import classNames from 'classnames';
 import Taro from '@tarojs/taro';
 import { useAppStore } from '@/store';
-import { getStatusText } from '@/utils';
+import { MedicineTimeSlot, TIME_SLOT_LABELS } from '@/types';
+import { getStatusText, formatDate } from '@/utils';
 import FamilyMemberCard from '@/components/FamilyMemberCard';
 import BigButton from '@/components/BigButton';
 import styles from './index.module.scss';
@@ -11,17 +12,23 @@ import styles from './index.module.scss';
 const FamilyPage: React.FC = () => {
   const {
     familyMembers,
+    globalReminderTimes,
     getTodayRecords,
     getTodayProgress,
     hasConsecutiveMissed,
+    getConsecutiveMissedDetail,
+    updateGlobalReminderTime,
     settings
   } = useAppStore();
 
   const [showBindCode, setShowBindCode] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [editingSlot, setEditingSlot] = useState<MedicineTimeSlot | null>(null);
 
   const todayRecords = useMemo(() => getTodayRecords(), [getTodayRecords]);
   const todayProgress = useMemo(() => getTodayProgress(), [getTodayProgress]);
   const hasMissedAlert = useMemo(() => hasConsecutiveMissed(), [hasConsecutiveMissed]);
+  const missedDetail = useMemo(() => getConsecutiveMissedDetail(), [getConsecutiveMissedDetail]);
 
   const getStatusStyle = () => {
     if (hasMissedAlert) return styles.statusDanger;
@@ -42,6 +49,59 @@ const FamilyPage: React.FC = () => {
     return '待服药';
   };
 
+  const alerts = useMemo(() => {
+    const list: { time: string; desc: string; action: string; type: string }[] = [];
+    
+    if (missedDetail.consecutiveDays >= 3) {
+      list.push({
+        time: '刚刚',
+        desc: `⚠️ 连续${missedDetail.consecutiveDays}天有漏服药品，共漏服${missedDetail.totalMissed}次，请家属关注！`,
+        action: '查看漏服详情',
+        type: 'danger'
+      });
+    }
+
+    const todayMissed = todayRecords.filter(r => r.status === 'missed');
+    todayMissed.forEach(r => {
+      list.push({
+        time: `今天 ${r.scheduledTime}`,
+        desc: `漏服药品：${r.medicineName}（${r.dosage}）`,
+        action: '提醒补服',
+        type: 'warning'
+      });
+    });
+
+    const todayTaken = todayRecords.filter(r => r.status === 'taken');
+    if (todayTaken.length > 0 && todayMissed.length === 0 && missedDetail.consecutiveDays === 0) {
+      list.push({
+        time: '今天',
+        desc: `已完成${todayTaken.length}次服药，老人状态良好！`,
+        action: '',
+        type: 'success'
+      });
+    }
+
+    if (todayProgress.percentage === 100) {
+      list.push({
+        time: '刚刚',
+        desc: '🎉 今天的所有药品都已服用完毕！',
+        action: '',
+        type: 'success'
+      });
+    }
+
+    if (list.length === 0) {
+      list.push({
+        time: '今天',
+        desc: '暂无异常情况',
+        action: '',
+        type: 'info'
+      });
+    }
+
+    return list;
+  }, [todayRecords, missedDetail, todayProgress]);
+
   const handleAddFamily = () => {
     Taro.showActionSheet({
       itemList: ['添加家属', '生成绑定二维码'],
@@ -59,18 +119,29 @@ const FamilyPage: React.FC = () => {
   };
 
   const handleReminderEdit = () => {
-    Taro.showModal({
-      title: '修改提醒时间',
-      content: '您确定要为老人修改提醒时间吗？',
-      confirmText: '确定修改',
-      cancelText: '取消',
+    setShowReminderModal(true);
+  };
+
+  const handleEditSlotTime = (slot: MedicineTimeSlot) => {
+    setEditingSlot(slot);
+    const timeOptions = slot === 'morning'
+      ? ['05:30', '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00']
+      : slot === 'noon'
+      ? ['11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00']
+      : slot === 'evening'
+      ? ['17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30']
+      : ['20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00'];
+    
+    Taro.showActionSheet({
+      itemList: timeOptions,
       success: (res) => {
-        if (res.confirm) {
-          Taro.showToast({
-            title: '请前往提醒设置页面修改',
-            icon: 'none'
-          });
-        }
+        const newTime = timeOptions[res.tapIndex];
+        updateGlobalReminderTime(slot, newTime);
+        Taro.showToast({
+          title: `${TIME_SLOT_LABELS[slot]}已改为${newTime}`,
+          icon: 'success'
+        });
+        setEditingSlot(null);
       }
     });
   };
@@ -120,24 +191,30 @@ const FamilyPage: React.FC = () => {
     });
   };
 
-  const mockAlerts = hasMissedAlert ? [
-    {
-      time: '今天 08:30',
-      desc: '连续3天有漏服药品，请家属关注',
-      action: '查看详情'
-    },
-    {
-      time: '昨天 18:30',
-      desc: '晚上用药漏服：二甲双胍片',
-      action: '提醒老人补服'
+  const handleAlertClick = (alert: { type: string; desc: string }) => {
+    if (alert.type === 'danger') {
+      const dates = missedDetail.dates.join('、');
+      Taro.showModal({
+        title: '连续漏服详情',
+        content: `漏服日期：${dates}\n总计漏服：${missedDetail.totalMissed}次\n\n建议：请联系老人确认情况，必要时调整提醒时间或协助服药。`,
+        showCancel: false,
+        confirmText: '我知道了'
+      });
+    } else if (alert.action === '提醒补服') {
+      Taro.showToast({
+        title: '已发送补服提醒',
+        icon: 'success'
+      });
     }
-  ] : [
-    {
-      time: '今天 09:00',
-      desc: '早上用药全部完成，真棒！',
-      action: ''
-    }
-  ];
+  };
+
+  const timeSlotList: MedicineTimeSlot[] = ['morning', 'noon', 'evening', 'night'];
+  const timeSlotIcons: Record<MedicineTimeSlot, string> = {
+    morning: '🌅',
+    noon: '☀️',
+    evening: '🌆',
+    night: '🌙'
+  };
 
   return (
     <ScrollView
@@ -153,10 +230,19 @@ const FamilyPage: React.FC = () => {
         <View className={styles.statusContent}>
           <View className={styles.statusMain}>
             <Text className={styles.statusValue}>{todayProgress.percentage}%</Text>
-            <Text className={styles.statusLabel}>{getStatusTextDisplay()} · {todayProgress.taken}/{todayProgress.total}</Text>
+            <Text className={styles.statusLabel}>
+              {getStatusTextDisplay()} · {todayProgress.taken}/{todayProgress.total}
+            </Text>
           </View>
           <Text className={styles.statusIcon}>{getStatusIcon()}</Text>
         </View>
+        {hasMissedAlert && (
+          <View className={styles.missedDetailBar}>
+            <Text style={{ fontSize: '28rpx', color: '#fff', fontWeight: 'bold' }}>
+              ⚠️ 连续{missedDetail.consecutiveDays}天漏服，共{missedDetail.totalMissed}次
+            </Text>
+          </View>
+        )}
       </View>
 
       <View className={styles.statsRow}>
@@ -165,11 +251,15 @@ const FamilyPage: React.FC = () => {
           <Text className={styles.statText}>已服药</Text>
         </View>
         <View className={styles.statItem}>
-          <Text className={classNames(styles.statNumber, styles.warning)}>{todayRecords.filter(r => r.status === 'pending').length}</Text>
+          <Text className={classNames(styles.statNumber, styles.warning)}>
+            {todayRecords.filter(r => r.status === 'pending').length}
+          </Text>
           <Text className={styles.statText}>待服药</Text>
         </View>
         <View className={styles.statItem}>
-          <Text className={classNames(styles.statNumber, styles.danger)}>{todayRecords.filter(r => r.status === 'missed').length}</Text>
+          <Text className={classNames(styles.statNumber, styles.danger)}>
+            {todayRecords.filter(r => r.status === 'missed').length}
+          </Text>
           <Text className={styles.statText}>漏服</Text>
         </View>
       </View>
@@ -198,13 +288,22 @@ const FamilyPage: React.FC = () => {
           <Text className={styles.alertIcon}>🔔</Text>
           异常提醒
         </Text>
-        {mockAlerts.map((alert, index) => (
-          <View key={index} className={styles.alertItem}>
+        {alerts.map((alert, index) => (
+          <View
+            key={index}
+            className={classNames(
+              styles.alertItem,
+              alert.type === 'danger' && styles.alertDanger,
+              alert.type === 'warning' && styles.alertWarning,
+              alert.type === 'success' && styles.alertSuccess
+            )}
+            onClick={() => handleAlertClick(alert)}
+          >
             <Text className={styles.alertTime}>{alert.time}</Text>
             <View className={styles.alertContent}>
               <Text className={styles.alertDesc}>{alert.desc}</Text>
               {alert.action && (
-                <Text className={styles.alertAction}>{alert.action}</Text>
+                <Text className={styles.alertAction}>{alert.action} →</Text>
               )}
             </View>
           </View>
@@ -214,24 +313,40 @@ const FamilyPage: React.FC = () => {
       <View className={styles.medicinePreview}>
         <View className={styles.previewHeader}>
           <Text className={styles.previewTitle}>今日服药明细</Text>
-          <Text className={styles.previewTime}>实时更新</Text>
+          <Text className={styles.previewTime}>{formatDate()} 实时更新</Text>
         </View>
         <View className={styles.previewList}>
-          {todayRecords.slice(0, 5).map(record => (
-            <View key={record.id} className={styles.previewItem}>
-              <View
-                className={styles.previewColor}
-                style={{ backgroundColor: record.medicineColor }}
-              />
-              <View className={styles.previewInfo}>
-                <Text className={styles.previewName}>{record.medicineName}</Text>
-                <Text className={classNames(styles.previewStatus, styles[record.status])}>
-                  {record.scheduledTime} · {getStatusText(record.status)}
-                  {record.takenTime && ` · ${record.takenTime}服用`}
-                </Text>
+          {todayRecords.length > 0 ? (
+            todayRecords.map(record => (
+              <View key={record.id} className={styles.previewItem}>
+                <View
+                  className={styles.previewColor}
+                  style={{ backgroundColor: record.medicineColor }}
+                />
+                <View className={styles.previewInfo}>
+                  <Text className={styles.previewName}>{record.medicineName}</Text>
+                  <Text className={classNames(styles.previewStatus, styles[record.status])}>
+                    {TIME_SLOT_LABELS[record.timeSlot]} {record.scheduledTime} · {getStatusText(record.status)}
+                    {record.takenTime && ` · ${record.takenTime}服用`}
+                  </Text>
+                </View>
+                {record.status === 'missed' && (
+                  <Button
+                    className={styles.catchUpBtn}
+                    onClick={() => {
+                      Taro.showToast({ title: '已发送补服提醒', icon: 'success' });
+                    }}
+                  >
+                    提醒
+                  </Button>
+                )}
               </View>
+            ))
+          ) : (
+            <View style={{ padding: '32rpx', textAlign: 'center' }}>
+              <Text style={{ color: '#86909c', fontSize: '28rpx' }}>暂无服药记录</Text>
             </View>
-          ))}
+          )}
         </View>
       </View>
 
@@ -282,6 +397,62 @@ const FamilyPage: React.FC = () => {
             variant="outline"
             block
           />
+        </View>
+      )}
+
+      {showReminderModal && (
+        <View className={styles.medicineDetail} onClick={() => setShowReminderModal(false)}>
+          <View className={styles.detailContent} onClick={(e) => e.stopPropagation()}>
+            <View className={styles.detailHeader}>
+              <Text className={styles.detailTitle}>
+                ⏰ 修改提醒时间
+              </Text>
+              <View className={styles.closeBtn} onClick={() => setShowReminderModal(false)}>✕</View>
+            </View>
+            
+            <View style={{ padding: '24rpx 32rpx' }}>
+              <Text style={{ fontSize: '28rpx', color: '#86909c', marginBottom: '32rpx' }}>
+                以下是老人当前的服药提醒时间，点击即可为老人远程修改
+              </Text>
+
+              {timeSlotList.map(slot => (
+                <View key={slot} className={styles.timeSlotEditRow}>
+                  <Text className={styles.timeSlotEditIcon}>{timeSlotIcons[slot]}</Text>
+                  <View className={styles.timeSlotEditInfo}>
+                    <Text className={styles.timeSlotEditName}>{TIME_SLOT_LABELS[slot]}</Text>
+                    <Text className={styles.timeSlotEditTime}>{globalReminderTimes[slot]}</Text>
+                  </View>
+                  <Button
+                    className={classNames(styles.timeSlotEditBtn, editingSlot === slot && styles.loading)}
+                    onClick={() => handleEditSlotTime(slot)}
+                  >
+                    {editingSlot === slot ? '修改中...' : '修改'}
+                  </Button>
+                </View>
+              ))}
+
+              <View style={{
+                marginTop: '32rpx',
+                padding: '24rpx',
+                background: '#fff7e6',
+                borderRadius: '16rpx'
+              }}>
+                <Text style={{ fontSize: '26rpx', color: '#fa8c16' }}>
+                  💡 提示：修改时间后，老人的提醒会立即生效。请确保选择老人适合的服药时间。
+                </Text>
+              </View>
+            </View>
+
+            <View style={{ padding: '32rpx' }}>
+              <BigButton
+                text="完成修改"
+                onClick={() => setShowReminderModal(false)}
+                type="primary"
+                block
+                size="large"
+              />
+            </View>
+          </View>
         </View>
       )}
     </ScrollView>

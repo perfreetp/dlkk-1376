@@ -8,7 +8,15 @@ import BigButton from '@/components/BigButton';
 import styles from './index.module.scss';
 
 const ReminderPage: React.FC = () => {
-  const { settings, updateReminderSettings, setAppMode, setFontSize, speak } = useAppStore();
+  const {
+    settings,
+    globalReminderTimes,
+    updateReminderSettings,
+    setAppMode,
+    setFontSize,
+    speak,
+    updateGlobalReminderTime
+  } = useAppStore();
   const [testVolume, setTestVolume] = useState(false);
 
   const handleToggleReminder = (enabled: boolean) => {
@@ -68,13 +76,23 @@ const ReminderPage: React.FC = () => {
     setTimeout(() => setTestVolume(false), 3000);
   };
 
-  const handleTimeChange = (_slot: string) => {
+  const handleTimeChange = (slot: 'morning' | 'noon' | 'evening' | 'night') => {
+    const timeOptions = slot === 'morning'
+      ? ['05:30', '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00']
+      : slot === 'noon'
+      ? ['11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00']
+      : slot === 'evening'
+      ? ['17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30']
+      : ['20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00'];
+    
     Taro.showActionSheet({
-      itemList: ['06:00', '07:00', '07:30', '08:00', '08:30', '09:00', '12:00', '12:30', '13:00', '18:00', '18:30', '19:00', '21:00', '21:30', '22:00'],
+      itemList: timeOptions,
       success: (res) => {
-        const times = ['06:00', '07:00', '07:30', '08:00', '08:30', '09:00', '12:00', '12:30', '13:00', '18:00', '18:30', '19:00', '21:00', '21:30', '22:00'];
+        const newTime = timeOptions[res.tapIndex];
+        updateGlobalReminderTime(slot, newTime);
+        const slotNames = { morning: '早上', noon: '中午', evening: '晚上', night: '睡前' };
         Taro.showToast({
-          title: `已设置为${times[res.tapIndex]}`,
+          title: `${slotNames[slot]}已设为${newTime}`,
           icon: 'success'
         });
       }
@@ -103,10 +121,10 @@ const ReminderPage: React.FC = () => {
   ];
 
   const timeSlots = [
-    { slot: 'morning', icon: '🌅', name: '早上', defaultTime: '08:00' },
-    { slot: 'noon', icon: '☀️', name: '中午', defaultTime: '12:30' },
-    { slot: 'evening', icon: '🌆', name: '晚上', defaultTime: '18:30' },
-    { slot: 'night', icon: '🌙', name: '睡前', defaultTime: '21:30' }
+    { slot: 'morning' as const, icon: '🌅', name: '早上' },
+    { slot: 'noon' as const, icon: '☀️', name: '中午' },
+    { slot: 'evening' as const, icon: '🌆', name: '晚上' },
+    { slot: 'night' as const, icon: '🌙', name: '睡前' }
   ];
 
   return (
@@ -272,7 +290,7 @@ const ReminderPage: React.FC = () => {
                 className={styles.timePicker}
                 onClick={() => handleTimeChange(item.slot)}
               >
-                {item.defaultTime}
+                ⏰ {globalReminderTimes[item.slot]}
               </Button>
             </View>
           ))}

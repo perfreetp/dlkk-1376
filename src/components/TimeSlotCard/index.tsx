@@ -9,16 +9,22 @@ interface TimeSlotCardProps {
   slot: MedicineTimeSlot;
   records: MedicineRecord[];
   showActions?: boolean;
+  highlight?: boolean;
   className?: string;
+  onTakeMedicine?: (recordId: string) => void;
+  onCatchUp?: (recordId: string) => void;
 }
 
 const TimeSlotCard: React.FC<TimeSlotCardProps> = ({
   slot,
   records,
   showActions = true,
-  className = ''
+  highlight = false,
+  className = '',
+  onTakeMedicine,
+  onCatchUp
 }) => {
-  const { takeMedicine, skipMedicine, speak } = useAppStore();
+  const { takeMedicine, speak } = useAppStore();
 
   const missedCount = records.filter(r => r.status === 'missed').length;
   const pendingCount = records.filter(r => r.status === 'pending').length;
@@ -34,8 +40,12 @@ const TimeSlotCard: React.FC<TimeSlotCardProps> = ({
   const statusSummary = getStatusSummary();
 
   const handleTake = (recordId: string, medicineName: string, dosage: string) => {
-    takeMedicine(recordId);
-    speak(`已确认服用${medicineName}，${dosage}`);
+    if (onTakeMedicine) {
+      onTakeMedicine(recordId);
+    } else {
+      takeMedicine(recordId);
+      speak(`已确认服用${medicineName}，${dosage}`);
+    }
   };
 
   const handleSpeak = (medicineName: string, dosage: string, time: string) => {
@@ -43,8 +53,12 @@ const TimeSlotCard: React.FC<TimeSlotCardProps> = ({
   };
 
   const handleCatchUp = (recordId: string) => {
-    takeMedicine(recordId);
-    speak('已补服药品');
+    if (onCatchUp) {
+      onCatchUp(recordId);
+    } else {
+      takeMedicine(recordId);
+      speak('已补服药品');
+    }
   };
 
   const getTimeRange = () => {
@@ -58,7 +72,7 @@ const TimeSlotCard: React.FC<TimeSlotCardProps> = ({
   };
 
   return (
-    <View className={classNames(styles.timeSlotCard, className)}>
+    <View className={classNames(styles.timeSlotCard, className, highlight && styles.highlightCard)}>
       <View className={styles.cardHeader}>
         <View className={styles.timeInfo}>
           <Text className={styles.timeIcon}>{TIME_SLOT_ICONS[slot]}</Text>
